@@ -79,16 +79,7 @@ interactiveASTWalk = (ast) ->
 -- testing
 import parse from require "tildeath.parser"
 ast = parse [[
-bifurcate THIS[#RED->THIS,#BLUE->THIS];
-import #RED->tildeath/std/universe #RED->U1;
-import #BLUE->tildeath/std/universe #BLUE->U2;
-
-#RED~ATH(U1) {
-  #BLUE~ATH(!U2) {
-} EXECUTE(~ATH(#BLUE->THIS){}EXECUTE(NULL));
-  } EXECUTE(~ATH(#RED->THIS){}EXECUTE(NULL));
-
-[#RED->THIS,#BLUE->THIS]:DIE();
+RUN["Download.lua", "test"];
 ]]
 
 --print inspect get {2}, ast

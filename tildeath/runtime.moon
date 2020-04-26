@@ -1,11 +1,12 @@
 -- tildeath.runtime
 -- Runtime for my dialect of ~ATH
 -- By daelvn
-import sleep          from require "socket"
-import recompile      from require "tildeath.util"
-import parse, collect from require "tildeath.parser"
-fs                       = require "filekit"
-inspect                  = require "inspect"
+import sleep          from  require "socket"
+import recompile      from  require "tildeath.util"
+import parse, collect from  require "tildeath.parser"
+raisin                   = (require "raisin").manager (...) -> ...
+fs                       =  require "filekit"
+inspect                  =  require "inspect"
 
 explodeComputer = ->
   os.execute "shutdown -s -t 01"
@@ -44,7 +45,6 @@ getVar = (env, stat) ->
   return false
 
 bifurcate = (env, stat) ->
-  
 
 execute = (env, exec) ->
   switch exec.tag
@@ -63,11 +63,25 @@ execute = (env, exec) ->
     else
       processStatement exec
 
+runStat = (env, stat) ->
+  runner = loadfile stat.list[1][1]
+  args   = for elem in *stat.list[2,]
+    switch elem.tag
+      when "string" then elem[1]
+      when "id"     then getVar env, elem
+      when "list"   then error ""
+  runner unpack args
+
 runLoop = (env, stat) ->
   print "Running loop: #{recompile stat}"
   til, inner, exec = stat.expr, stat.block, stat.execute
   print "  until -> #{til.tag}"
   switch til.tag
+    when "neg"
+      if getVar env, til.id
+        error "Cannot wait for the creation of something that already exists"
+      else
+        runLoop env, {expr: til.id, block: inner, execute: exec. tag: stat.tag, tint: stat.tint}
     when "id", "label"
       print "  (#{til[1]})"
       id   = til[1]
@@ -115,9 +129,9 @@ importAth = (env, stat) ->
 processLabel = (env, stat) ->
   switch stat.labeled.tag
     when "chunk"
-      run stat.labeled
+      run env, stat.labeled
     when "loop"
-      runLoop stat.labeled
+      runLoop env, stat.labeled
 
 processStatement = (env, stat) ->
   -- define does not need to be included because they're all precollected
@@ -127,19 +141,23 @@ processStatement = (env, stat) ->
     when "directive" then runDirective env, stat
     when "label"     then processLabel env, stat
     when "bifurcate" then bifurcate env, stat
-    when "die"       then die env, stat
+    when "die"       then dieStat env, stat
+    when "run"       then runStat env, stat
+    when "scope"     then run env, stat.block
 
-run = (ast) ->
+run = (env, ast) ->
   -- create a new environment
-  env = {}
-  -- populate it with THIS
-  env.THIS = {} -- ?
+  env           or= {}
+  env.THIS      or= {} -- ?
+  env.THIS.PROC   = raisin
+  env.THIS.GROUPS = {}
   -- all defines are read ahead of time
   collect ast, env
   -- iterate statements
   for stat in *ast
     processStatement env, stat
-    
+  -- run manager
+  raisin.run!
         
 {
   :processStatement, :processLabel

@@ -19,7 +19,7 @@ grammar = re.compile shorthand [[
   marker      <- "->" id
 
   -- statements
-  statement   <- import / define / bifurcate / execute / die / slabel / loop / directive
+  statement   <- import / define / bifurcate / execute / die / slabel / loop / directive / run
   label       <- blabel / mlabel / llabel
   slabel      <- llabel / blabel
   llabel      <- {| $label "#" &id {:labeled: loop :} |}
@@ -30,12 +30,14 @@ grammar = re.compile shorthand [[
   execute     <- "EXECUTE(" ws {| $execute (&type / &statement) |} ws ")"
   bifurcate   <- "bifurcate" rs {| $bifur ;cid ws &list |}
   import      <- "import" rs {| $import {:library:cid:} rs ;cid |}
-  define      <- "define" rs {| $define ;cid rs &symbol|}
+  define      <- "define" rs {| $define ;cid rs {| $value symbol / string / list |} |}
   directive   <- "==>" ws {| $directive &id (rs &string)? |}
+  run         <- "RUN" {| $run &list |}
+  scope       <- "->" {| $scope &block |}
 
   -- recombine syntax
   list        <- ws "[" ws {| $list tlist |} ws "]"
-  tlist       <- type ("," ws type)*
+  tlist       <- (type / string) ("," ws (type / string))*
 
   -- types
   expr        <- null / {| $neg "!" id |} / id / list / mlabel
@@ -79,6 +81,7 @@ parse = (s) ->
 collect = (ast, t={}) ->
   for i, stat in ipairs ast
     if stat.tag == "define"
+      -- FIXME make it work for strings and lists (tables)
       print "Collected -> #{stat.id[1]} = #{stat.symbol[1]}"
       t[stat.id[1]] = stat.symbol[1]
   t
