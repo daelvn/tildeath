@@ -81,7 +81,7 @@ runLoop = (env, stat) ->
       if getVar env, til.id
         error "Cannot wait for the creation of something that already exists"
       else
-        runLoop env, {expr: til.id, block: inner, execute: exec. tag: stat.tag, tint: stat.tint}
+        runLoop env, {expr: til.id, block: inner, execute: exec, tag: stat.tag, tint: stat.tint}
     when "id", "label"
       print "  (#{til[1]})"
       id   = til[1]

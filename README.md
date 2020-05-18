@@ -6,7 +6,7 @@ This is my own implementation of [~ATH](https://mspaintadventures.fandom.com/wik
 
 ### Filetype
 
-There's really no MIME filetype for this, although it would be rad. I'm using the standard, Homestuck-official `.~ATH` filetype. At one point `.~ath` is used too, but you won't be able to load libraries with that extension.
+There's really no MIME filetype for this, although it would be rad. I'm using the standard, Homestuck-official `.~ATH` extension. At one point `.~ath` is used too, but you won't be able to load libraries with that extension.
 
 ### Lifetime
 
@@ -16,8 +16,8 @@ A lifetime of 0 means that the object will loop forever. Any other lifetime is i
 
 - If a logic error is found, the computer will be explosionated (or shut down).
 - If you try to kill an imported object, the computer will be blow up'ed (or shut down).
-- If you try to import a library that does not exist, it will instead make it an object with the lifespan of [\[S\] Collide](https://www.youtube.com/watch?v=Y5wYN6rB_Rg) in seconds (1801s).
-- If there is a syntax error, the file will be deleted. Nobody wants invalid files! (~~you're not a file Tavros you can stay.~~)
+- If you try to import a library that does not exist, it will instead make it an object with the lifespan of [\[S\] Collide](https://www.youtube.com/watch?v=Y5wYN6rB_Rg) in seconds (1080s).
+- If there is a syntax error, the file will be deleted. Nobody wants invalid files!
 - See more below!
 
 ## Installing
