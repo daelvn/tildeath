@@ -1,0 +1,10 @@
+bifurcate THIS[#RED->THIS, #BLUE->THIS];
+import #RED->universe #RED->U1;
+import #BLUE->universe #BLUE->U2;
+
+#RED~ATH(#RED->U1) {
+  #BLUE~ATH(!#BLUE->U2) {
+  } EXECUTE(~ATH(#BLUE->THIS){}EXECUTE(NULL));
+} EXECUTE(~ATH(#RED->THIS){}EXECUTE(NULL));
+
+[#RED->THIS, #BLUE->THIS].DIE();

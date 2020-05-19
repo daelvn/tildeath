@@ -4,6 +4,7 @@
 import sleep          from  require "socket"
 import recompile      from  require "tildeath.util"
 import parse, collect from  require "tildeath.parser"
+import colorize       from  require "ansikit.style"
 raisin                   = (require "raisin").manager (...) -> ...
 fs                       =  require "filekit"
 inspect                  =  require "inspect"
@@ -73,12 +74,12 @@ runStat = (env, stat) ->
   runner unpack args
 
 runLoop = (env, stat) ->
-  print "Running loop: #{recompile stat}"
+  print colorize "Running loop: #{recompile stat}"
   til, inner, exec = stat.expr, stat.block, stat.execute
   print "  until -> #{til.tag}"
   switch til.tag
     when "neg"
-      if getVar env, til.id
+      if getVar env, til[1]
         error "Cannot wait for the creation of something that already exists"
       else
         runLoop env, {expr: til.id, block: inner, execute: exec, tag: stat.tag, tint: stat.tint}
@@ -89,11 +90,11 @@ runLoop = (env, stat) ->
       if ntil == 0
         while true do
           print "  he does another."
-          run inner
+          run env, inner, true
           sleep 1
       else
         for i=1, ntil
-          run inner
+          run env, inner, true
           print "  [#{i}]"
           sleep 1
   print "  execute -> #{recompile exec}"
@@ -113,10 +114,17 @@ runDirective = (env, stat) ->
 importAth = (env, stat) ->
   library = if stat.library.tag == "id" then stat.library[1] else stat.library.labeled[1]
   to      = if stat.id.tag == "id"      then stat.id[1]      else stat.id.labeled[1]
-  print "Importing: #{library} as #{to}"
-  if fs.exists "#{library}.~ATH"
+  path    = if fs.exists "#{library}.~ATH"
+    "#{library}.~ATH"
+  elseif fs.exists "tildeath/std/#{library}.~ATH"
+    "tildeath/std/#{library}.~ATH"
+  else
+    "uHHH.~ATH"
+  print "Importing: #{path} as #{to}"
+  
+  if fs.exists path
     local content
-    with io.open "#{library}.~ATH", "r"
+    with io.open path, "r"
       content = \read "*a"
       \close!
     ast          = parse content
@@ -124,12 +132,12 @@ importAth = (env, stat) ->
     lib.imported = true
     setVar env, stat.id, lib
   else
-    print "Could not find #{library}.~ATH"
+    print "Could not find #{path}"
 
 processLabel = (env, stat) ->
   switch stat.labeled.tag
     when "chunk"
-      run env, stat.labeled
+      run env, stat.labeled, true
     when "loop"
       runLoop env, stat.labeled
 
@@ -143,16 +151,16 @@ processStatement = (env, stat) ->
     when "bifurcate" then bifurcate env, stat
     when "die"       then dieStat env, stat
     when "run"       then runStat env, stat
-    when "scope"     then run env, stat.block
+    when "scope"     then run env, stat.block, true
 
-run = (env, ast) ->
+run = (env, ast, subproc=false) ->
   -- create a new environment
   env           or= {}
   env.THIS      or= {} -- ?
   env.THIS.PROC   = raisin
   env.THIS.GROUPS = {}
   -- all defines are read ahead of time
-  collect ast, env
+  collect ast, env unless subproc
   -- iterate statements
   for stat in *ast
     processStatement env, stat

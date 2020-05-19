@@ -1,10 +1,15 @@
 import colorize from require "ansikit.style"
+inspect = require "inspect"
 
 -- functions
 recompile = (node, parent="root", ptint="white") ->
+  --print "#{parent}.#{node and node.tag or "?"}", ptint
+  --print inspect node
   switch node.tag
-    when "id", "symbol"
+    when "id"
       return node[1]
+    when "symbol"
+      return ":" .. node[1]
     when "string"
       return "\"#{node[1]}\""
     when "null"
@@ -18,7 +23,7 @@ recompile = (node, parent="root", ptint="white") ->
     when "import"
       return "import #{recompile node.library, "import"} #{recompile node.id, "import"};"
     when "define"
-      return "define #{recompile node.id, "define"} :#{recompile node.value, "define"};"
+      return "define #{recompile node.id, "define"} #{recompile node.value, "define"};"
     when "bifur"
       return "bifurcate #{recompile node.id, "bifur"}#{recompile node.list, "bifur"};"
     when "die"
@@ -33,7 +38,7 @@ recompile = (node, parent="root", ptint="white") ->
       return "{#{recompile node.block, "scope"}}"
     when "chunk"
       cnode = [recompile s, "chunk" for s in *node]
-      return table.concat cnode, "; "
+      return table.concat cnode, " "
     else
       return "???"
 

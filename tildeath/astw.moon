@@ -74,16 +74,7 @@ interactiveASTWalk = (ast) ->
             print "    #{k}"
       when "run", "r"
         import run from require "tildeath.runtime"
-        run node
- 
--- testing
-import parse from require "tildeath.parser"
-ast = parse [[
-RUN["Download.lua", "test"];
-]]
-
---print inspect get {2}, ast
-interactiveASTWalk ast
+        run {}, node
 
 {
   :interactiveASTWalk
